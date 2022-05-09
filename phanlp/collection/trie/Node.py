@@ -12,6 +12,7 @@ class BaseNode(metaclass=abc.ABCMeta):
         WORD_END_3 = 3
 
     def __init__(self, key: str = "", value=None, status=None):
+        super().__init__()
         self.key = key
         self.value = value
         self.status = status
@@ -55,11 +56,6 @@ class BaseNode(metaclass=abc.ABCMeta):
     def set_value(self, value):
         self.value = value
 
-    def set_status(self, status):
-        if status == self.StatusEnum.UNDEFINED_0:
-            status = self.StatusEnum.NOT_WORD_1
-        self.status = status
-
     def __eq__(self, other):
         if isinstance(other, BaseNode):
             other = other.key
@@ -101,7 +97,7 @@ class ListChildrenNode(BaseNode):
             target = self.children[index]
             add = target.change_child(node)
         else:
-            self.children.insert(index, node)
+            self.children.insert(-(index+1), node)
             add = True
         return add
 
@@ -110,6 +106,10 @@ class ListChildrenNode(BaseNode):
             return None
         index = ArrayTool.binary_search(self.children, key)
         return self.children[index] if index >= 0 else None
+
+    def __str__(self):
+        return f"ListChildrenNode{{status={self.status}, key={self.key}, value={self.value}, " \
+               f"children={len(self.children)}}}"
 
 
 class DictChildrenNode(BaseNode):
@@ -131,3 +131,7 @@ class DictChildrenNode(BaseNode):
         if not self.children:
             return None
         return self.children.get(key)
+
+    def __str__(self):
+        return f"DictChildrenNode{{status={self.status}, key={self.key}, value={self.value}, " \
+               f"children={len(self.children)}}}"
