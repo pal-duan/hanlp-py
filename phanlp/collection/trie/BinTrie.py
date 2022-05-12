@@ -5,7 +5,8 @@ from collection.trie.Node import ListChildrenNode
 
 
 def char_hash(key: str, length: int = 5) -> int:
-    return abs(hash(key)) % (10 ** length)
+    # return abs(hash(key)) % (10 ** length)
+    return ord(key)
 
 
 class BinTrie(ListChildrenNode, BaseTrie):
@@ -24,7 +25,7 @@ class BinTrie(ListChildrenNode, BaseTrie):
             self.children[char_hash(node.key)] = node
             add = True
         else:
-            add = self.change_child(node)
+            add = target.change_child(node)
         return add
 
     def __setitem__(self, key, value):
@@ -34,8 +35,13 @@ class BinTrie(ListChildrenNode, BaseTrie):
         for i, char in enumerate(key):
             if i == 0:
                 if i < len(key) - 1:
-                    state.add_child(ListChildrenNode(char, None, self.StatusEnum.NOT_WORD_1))
-                    state = state.get_child(char)
+                    target = state.children[char_hash(char)]
+                    if target is None:
+                        node = ListChildrenNode(char, None, self.StatusEnum.NOT_WORD_1)
+                        state.children[char_hash(char)] = node
+                        state = node
+                    else:
+                        state = target
                 else:
                     node = ListChildrenNode(char, value, self.StatusEnum.WORD_END_3)
                     state.children[char_hash(char)] = node
@@ -70,16 +76,24 @@ class BinTrie(ListChildrenNode, BaseTrie):
 
 
 if __name__ == "__main__":
+    import time
+    import re
+    start = time.time()
     trie = BinTrie()
-    trie["自然"] = "nature"
-    trie["自然"] = "NATURE"
-    trie["自然人"] = "human"
-    trie["自然语言"] = "language"
-    trie["自语"] = "talk to oneself"
-    trie["入门"] = "introduction"
-    print("自然" in trie)
-    print("自然" in trie)
-    print("自然" in trie)
-    print("自然" in trie)
-    print("自然" in trie)
-    print()
+    data = []
+    with open("D:\\project\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            s = re.split(r"\s", line.strip())
+            data.append(s[0])
+            # if s[0].startswith("±"):
+            #     print(s[0])
+            trie[s[0]] = "-".join(s[1:])
+    print(f"构建BinTrie耗时：{time.time()-start}")
+    start_1 = time.time()
+    for k in data:
+        # if k.startswith("么"):
+        #     print(k)
+        if k not in trie:
+            print(k)
+    print(f"遍历BinTrie耗时：{time.time()-start_1}")
+    print(f"总耗时：{time.time()-start}")

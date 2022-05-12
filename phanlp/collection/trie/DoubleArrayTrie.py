@@ -68,22 +68,22 @@ class DoubleArrayTrie(ITrie):
         self.max_code = 0
         self.min_code = 0
         if data is not None:
-            data = to_treemap(data)
-            self.build(data)
+            self.data = to_treemap(data)
+            # data = dict(sorted(data.items(), key=lambda x: x[0]))
+            self.build(self.data)
 
     def fetch(self, parent: Node, slblings: list):
         if self.error_ < 0:
             return 0
         prev = 0
-        i = parent.left
-        while i < parent.right:
+        for i in range(parent.left, parent.right):
             flag = self.length[i] if self.length is not None else len(self.key[i])
             if flag < parent.depth:
                 continue
             tmp = self.key[i]
             cur = 0
-            if self.length[i] if self.length is not None else len(tmp) != parent.depth:
-                cur = tmp[parent.depth] + 1
+            if (self.length[i] if self.length is not None else len(tmp)) != parent.depth:
+                cur = ord(tmp[parent.depth]) + 1
 
             if prev > cur:
                 self.error_ = -3
@@ -98,7 +98,6 @@ class DoubleArrayTrie(ITrie):
                     slblings[-1].right = i
                 slblings.append(tmp_node)
             prev = cur
-            i +=1
         if len(slblings) != 0:
             slblings[-1].right = parent.right
         return len(slblings)
@@ -133,11 +132,11 @@ class DoubleArrayTrie(ITrie):
 
             for i in range(1, len(siblings)):
                 if self.check[begin+siblings[i].code] != 0:
-                    continue
+                    break
             else:
                 break
 
-        if (nonzero_num / (pos - self.next_check_pos) >= 0.95):
+        if nonzero_num / (pos - self.next_check_pos + 1) >= 0.95:
             self.next_check_pos = pos
 
         used.add(begin)
@@ -158,14 +157,16 @@ class DoubleArrayTrie(ITrie):
             else:
                 h = self.insert(new_siblings, used)
                 self.base[begin + siblings[i].code] = h
+        return begin
 
     def build(self, key_value_map: dict) -> int:
         assert key_value_map is not None
         self.key = list(key_value_map.keys())
         self.v = list(key_value_map.values())
-        self.length = [len(k) for k in self.key]
+        # self.length = [len(k) for k in self.key]
         self.key_size = len(self.key)
-        self.resize(self.get_max_code(self.key))
+        # self.resize(self.get_max_code(self.key))
+        self.resize(65536*32)
         self.base[0] = 1
         self.next_check_pos = 0
 
@@ -183,8 +184,8 @@ class DoubleArrayTrie(ITrie):
         return self.error_
 
     def resize(self, new_size):
-        self.base += [0] * (new_size - len(self.base) + 10000)
-        self.check += [0] * (new_size - len(self.check) + 10000)
+        self.base += [0] * (new_size - len(self.base))
+        self.check += [0] * (new_size - len(self.check))
         self.alloc_size = len(self.base)
 
     def get_max_code(self, key_list=None):
@@ -197,13 +198,25 @@ class DoubleArrayTrie(ITrie):
                     self.min_code = ord(char)
         return self.max_code
 
+    def exact_match_search(self, key: str, pos: int = 0, length: int = 0, node_pos: int = 0) -> int:
+        if length <= 0:
+            length = len(key)
+        if node_pos <= 0:
+            node_pos = 0
+        result = -1
+        b = self.base[node_pos]
+        for i in range(pos, length):
+            p = b + ord(key[i]) + 1
+            if b == self.check[p]:
+                b = self.base[p]
+            else:
+                return result
 
-
-
-
-
-
-
+        p = b
+        n = self.base[p]
+        if b == self.check[p] and n < 0:
+            result = -n - 1
+        return result
 
     def save(self, out) -> bool:
         pass
@@ -218,12 +231,39 @@ class DoubleArrayTrie(ITrie):
         pass
 
     def contain_key(self, key: str) -> bool:
-        pass
+        return self.exact_match_search(key) >= 0
 
     def size(self) -> int:
         return len(self.v)
 
 
 if __name__ == "__main__":
-    a = DoubleArrayTrie()
-    print("test")
+    import time
+    import re
+    data = {}
+    start = time.time()
+    with open("D:\\project\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            s = re.split(r"\s", line.strip())
+            # s = line.strip().split("\t")
+            data[s[0]] = "-".join(s[1:])
+    print(f"文件读取耗时：{time.time()-start}")
+    start_1 = time.time()
+    a = DoubleArrayTrie(data)
+    print(f"构建双数组字典树耗时：{time.time()-start_1}")
+    start_2 = time.time()
+    err = []
+    for key in a.data.keys():
+        f = a.contain_key(key)
+        if not f:
+            err.append(key)
+    print(err)
+    print(len(err))
+    print(f"遍历双数组字典树耗时：{time.time()-start_2}")
+    # print("test")
+    # print(a.size)
+    # print(a.key_size)
+    # print(a.alloc_size)
+    # print(a.max_code)
+    # print(a.progress)
+    print(time.time() - start)
