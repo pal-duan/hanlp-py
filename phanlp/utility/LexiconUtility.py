@@ -22,7 +22,7 @@ class LexiconUtility(object):
         attribute = cls.get_attribute(word)
         if attribute is None:
             return 0
-        return attribute.totalFrequency
+        return attribute.total_frequency
 
 
 if __name__ == "__main__":

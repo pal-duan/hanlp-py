@@ -5,7 +5,13 @@
     Description:
     自定义词典
 """
+from dictionary.DynamicCustomDictionary import DynamicCustomDictionary
+from config import CUSTOM_DICTIONARY_PATH
+
+
 class CustomDictionary(object):
+    DEFAULT = DynamicCustomDictionary(CUSTOM_DICTIONARY_PATH)
+
     def __init__(self):
         pass
 

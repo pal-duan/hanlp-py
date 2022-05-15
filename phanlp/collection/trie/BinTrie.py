@@ -78,22 +78,30 @@ class BinTrie(ListChildrenNode, BaseTrie):
 if __name__ == "__main__":
     import time
     import re
+    import psutil
+    import os
+
+    pid = os.getpid()
+    p = psutil.Process(pid)
+    info_start = p.memory_full_info().uss / 1024
     start = time.time()
     trie = BinTrie()
-    data = []
-    with open("D:\\project\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+    data = {}
+    with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
         for line in f:
             s = re.split(r"\s", line.strip())
-            data.append(s[0])
-            # if s[0].startswith("±"):
-            #     print(s[0])
-            trie[s[0]] = "-".join(s[1:])
-    print(f"构建BinTrie耗时：{time.time()-start}")
+            data[s[0]] = "-".join(s[1:])
+    print(f"加载文件耗时：{time.time() - start}")
+    start_2 = time.time()
+    trie.build(data)
+    print(f"构建BinTrie耗时：{time.time()-start_2}")
     start_1 = time.time()
-    for k in data:
-        # if k.startswith("么"):
-        #     print(k)
+    for k, v in data.items():
         if k not in trie:
             print(k)
+        else:
+            assert v == trie[k]
     print(f"遍历BinTrie耗时：{time.time()-start_1}")
     print(f"总耗时：{time.time()-start}")
+    info_end = p.memory_full_info().uss / 1024
+    print(f"程序占用了内存{info_end - info_start}KB")

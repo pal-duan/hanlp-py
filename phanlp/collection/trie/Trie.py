@@ -40,6 +40,10 @@ class BaseTrie(metaclass=abc.ABCMeta):
     def remove(self, key):
         del self[key]
 
+    def build(self, data: dict):
+        for key, value in data.items():
+            self[key] = value
+
 
 class DCTrie(DictChildrenNode, BaseTrie):
     def __init__(self):
@@ -133,15 +137,73 @@ class DCLCTrie(DictChildrenNode, BaseTrie):
 
 
 if __name__ == "__main__":
-    print(DCTrie.__mro__)
+    import time
+    import re
+    import psutil
+    import os
+
+    pid = os.getpid()
+    p = psutil.Process(pid)
+    info_start = p.memory_full_info().uss / 1024
+
+    start = time.time()
+    # trie = DCTrie()
+    # data = {}
+    # with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+    #     for line in f:
+    #         s = re.split(r"\s", line.strip())
+    #         data[s[0]] = "-".join(s[1:])
+    # print(f"加载文件耗时：{time.time() - start}")
+    # start_2 = time.time()
+    # trie.build(data)
+    # print(f"构建DCTrie耗时：{time.time() - start_2}")
+    # start_1 = time.time()
+    # for k, v in data.items():
+    #     if k not in trie:
+    #         print(k)
+    #     else:
+    #         assert v == trie[k]
+    # print(f"遍历DCTrie耗时：{time.time() - start_1}")
+    # print(f"总耗时：{time.time() - start}")
+
+
+    # trie = LCTrie()
+    # data = {}
+    # with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+    #     for line in f:
+    #         s = re.split(r"\s", line.strip())
+    #         data[s[0]] = "-".join(s[1:])
+    # print(f"加载文件耗时：{time.time() - start}")
+    # start_2 = time.time()
+    # trie.build(data)
+    # print(f"构建LCTrie耗时：{time.time() - start_2}")
+    # start_1 = time.time()
+    # for k, v in data.items():
+    #     if k not in trie:
+    #         print(k)
+    #     else:
+    #         assert v == trie[k]
+    # print(f"遍历LCTrie耗时：{time.time() - start_1}")
+    # print(f"总耗时：{time.time() - start}")
+
     trie = DCLCTrie()
-    trie["自然"] = "nature"
-    trie["自然"] = "NATURE"
-    trie["自然人"] = "human"
-    trie["自然语言"] = "language"
-    trie["自语"] = "talk to oneself"
-    trie["入门"] = "introduction"
-    print(trie.size)
-    del trie["自然"]
-    print(trie.size)
-    print(trie["自然语"])
+    data = {}
+    with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            s = re.split(r"\s", line.strip())
+            data[s[0]] = "-".join(s[1:])
+    print(f"加载文件耗时：{time.time() - start}")
+    start_2 = time.time()
+    trie.build(data)
+    print(f"构建DCLCTrie耗时：{time.time() - start_2}")
+    start_1 = time.time()
+    for k, v in data.items():
+        if k not in trie:
+            print(k)
+        else:
+            assert v == trie[k]
+    print(f"遍历DCLCTrie耗时：{time.time() - start_1}")
+    print(f"总耗时：{time.time() - start}")
+
+    info_end = p.memory_full_info().uss / 1024
+    print(f"程序占用了内存{info_end - info_start}KB")

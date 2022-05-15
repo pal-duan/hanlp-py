@@ -12,6 +12,7 @@ import re
 
 from WordInfo import WordInfo
 from utility.LexiconUtility import LexiconUtility
+from algorithm.Heap import MinHeap
 
 
 class NewWordDiscover(object):
@@ -84,14 +85,9 @@ class NewWordDiscover(object):
                 continue
             word_info_list.append(info)
 
-
-
-
-
-
-
-
-
+        top_n = MinHeap(count)
+        top_n.heapify(word_info_list)
+        return top_n.to_list()
 
 
 if __name__ == "__main__":

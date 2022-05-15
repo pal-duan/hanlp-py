@@ -37,7 +37,7 @@ class ITrie(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def size(self) -> int:
+    def count(self) -> int:
         pass
 
 
@@ -68,9 +68,7 @@ class DoubleArrayTrie(ITrie):
         self.max_code = 0
         self.min_code = 0
         if data is not None:
-            self.data = to_treemap(data)
-            # data = dict(sorted(data.items(), key=lambda x: x[0]))
-            self.build(self.data)
+            self.build(data)
 
     def fetch(self, parent: Node, slblings: list):
         if self.error_ < 0:
@@ -84,6 +82,10 @@ class DoubleArrayTrie(ITrie):
             cur = 0
             if (self.length[i] if self.length is not None else len(tmp)) != parent.depth:
                 cur = ord(tmp[parent.depth]) + 1
+                if cur > self.max_code:
+                    self.max_code = cur
+                elif cur < self.min_code:
+                    self.min_code = cur
 
             if prev > cur:
                 self.error_ = -3
@@ -160,12 +162,12 @@ class DoubleArrayTrie(ITrie):
         return begin
 
     def build(self, key_value_map: dict) -> int:
+        key_value_map = to_treemap(key_value_map)
         assert key_value_map is not None
         self.key = list(key_value_map.keys())
         self.v = list(key_value_map.values())
         # self.length = [len(k) for k in self.key]
         self.key_size = len(self.key)
-        # self.resize(self.get_max_code(self.key))
         self.resize(65536*32)
         self.base[0] = 1
         self.next_check_pos = 0
@@ -188,16 +190,6 @@ class DoubleArrayTrie(ITrie):
         self.check += [0] * (new_size - len(self.check))
         self.alloc_size = len(self.base)
 
-    def get_max_code(self, key_list=None):
-        key_list = self.key if key_list is None else key_list
-        for key in key_list:
-            for char in key:
-                if ord(char) > self.max_code:
-                    self.max_code = ord(char)
-                if ord(char) < self.min_code:
-                    self.min_code = ord(char)
-        return self.max_code
-
     def exact_match_search(self, key: str, pos: int = 0, length: int = 0, node_pos: int = 0) -> int:
         if length <= 0:
             length = len(key)
@@ -218,31 +210,100 @@ class DoubleArrayTrie(ITrie):
             result = -n - 1
         return result
 
+    def transition(self, current: int, c: str) -> int:
+        b = self.base[current]
+        p = b + c + 1
+        if b == self.check[p]:
+            b = self.base[p]
+        else:
+            return -1
+        return b
+
+    def get_cache_obj(self) -> dict:
+        obj = {
+            "base": self.base,
+            "check": self.check,
+            "size": self.size,
+            "alloc_size": self.alloc_size,
+            "error_": self.error_,
+            "key": self.key,
+            "key_size": self.key_size,
+            "length": self.length,
+            "value": self.value,
+            "progress": self.progress,
+            "next_check_pos": self.next_check_pos,
+            "max_code": self.max_code,
+            "min_code": self.min_code
+        }
+        return obj
+
     def save(self, out) -> bool:
+        # TODO
         pass
 
-    def load(self, value) -> bool:
-        pass
+    def load(self, attributes: dict) -> bool:
+        try:
+            self.base = attributes["base"]
+            self.check = attributes["check"]
+            self.size = attributes["size"]
+            self.alloc_size = attributes["alloc_size"]
+            self.error_ = attributes["error_"]
+            self.key = attributes["key"]
+            self.key_size = attributes["key_size"]
+            self.length = attributes["length"]
+            self.value = attributes["value"]
+            self.progress = attributes["progress"]
+            self.next_check_pos = attributes["next_check_pos"]
+            self.max_code = attributes["max_code"]
+            self.min_code = attributes["min_code"]
+            self.v = attributes["v"]
+        except Exception:
+            return False
+        return True
 
-    def get(self, index: int):
+    def get(self, key: str):
+        index = self.exact_match_search(key)
+        if index >= 0:
+            return self.get_from_index(index)
+        return None
+
+    def get_from_index(self, index: int):
         return self.v[index]
 
     def get_value_array(self, a):
+        # TODO
         pass
 
     def contain_key(self, key: str) -> bool:
         return self.exact_match_search(key) >= 0
 
-    def size(self) -> int:
+    def count(self) -> int:
         return len(self.v)
+
+    def __len__(self):
+        return self.count()
+
+    def __contains__(self, item):
+        return self.contain_key(item)
+
+    def __getitem__(self, item):
+        return self.get(item)
+
+    def __str__(self):
+        return f"DoubleArrayTrie{{key_size={self.key_size}}}"
 
 
 if __name__ == "__main__":
     import time
     import re
+    import psutil
+    import os
+    pid = os.getpid()
+    p = psutil.Process(pid)
+    info_start = p.memory_full_info().uss/1024
     data = {}
     start = time.time()
-    with open("D:\\project\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+    with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
         for line in f:
             s = re.split(r"\s", line.strip())
             # s = line.strip().split("\t")
@@ -253,10 +314,14 @@ if __name__ == "__main__":
     print(f"构建双数组字典树耗时：{time.time()-start_1}")
     start_2 = time.time()
     err = []
-    for key in a.data.keys():
+    for key, value in data.items():
         f = a.contain_key(key)
         if not f:
             err.append(key)
+        else:
+            v = a.get(key)
+            if v != value:
+                print(f"key: {key}, value: {value}, v: {v}")
     print(err)
     print(len(err))
     print(f"遍历双数组字典树耗时：{time.time()-start_2}")
@@ -267,3 +332,5 @@ if __name__ == "__main__":
     # print(a.max_code)
     # print(a.progress)
     print(time.time() - start)
+    info_end = p.memory_full_info().uss/1024
+    print(f"程序占用了内存{info_end-info_start}KB")
