@@ -18,6 +18,7 @@ from config import CORE_DICTIONARY_PATH
 from utility.logger import logger
 from utility.Predefine import Predefine
 from corpus.tag.Nature import Nature
+from algorithm.pytreemap import TreeMap
 
 
 class CoreDictionaryLoadError(Exception):
@@ -49,7 +50,7 @@ class CoreDictionary(object):
         logger.info(f"核心词典开始加载：{path}")
         if cls.load_dat(path):
             return True
-        _map = {}
+        _map = TreeMap()
         try:
             br = open(path, "r", encoding="utf-8")
             total_frequency = 0
@@ -73,9 +74,24 @@ class CoreDictionary(object):
 
             # 写入缓存
             try:
-                cls.trie.total_frequency = total_frequency
-                with(open(path.with_suffix(Predefine.BIN_EXT), "wb")) as f:
-                    pickle.dump(cls.trie, f)
+                with open(path.with_suffix(Predefine.BIN_EXT), "w") as f:
+                    attribute_list = _map.values()
+                    f.write(str(attribute_list.size()) + "\n")
+                    for attribute in attribute_list:
+                        f.write(str(attribute.total_frequency) + "\n")
+                        f.write(str(len(attribute.nature)) + "\n")
+                        for i in range(len(attribute.nature)):
+                            f.write(str(attribute.nature[i].ordinal) + "\n")
+                            f.write(str(attribute.frequency[i]) + "\n")
+                    cls.trie.save(f)
+                    f.write(str(total_frequency) + "\n")
+
+                # 直接用pickle缓存
+                # cls.trie.total_frequency = total_frequency
+                # with(open(path.with_suffix(Predefine.BIN_EXT), "wb")) as f:
+                #     pickle.dump(cls.trie, f)
+
+                # 以json格式缓存
                 # bin_json = {}
                 # attribute_list = cls.trie.v
                 # attribute_total_frequency_list = []
@@ -109,11 +125,33 @@ class CoreDictionary(object):
         return True
 
     @classmethod
-    def load_dat(cls, path: str) -> bool:
+    def load_dat(cls, path: Path) -> bool:
         try:
-            with open(path.with_suffix(Predefine.BIN_EXT), "rb") as f:
-                cls.trie = pickle.load(f)
-            Predefine.set_total_frequency(cls.trie.total_frequency)
+            with open(path.with_suffix(Predefine.BIN_EXT), "r") as f:
+                size = int(f.readline().strip())
+                attributes = []
+                nature_index_array = Nature.values
+                for i in range(size):
+                    current_total_frequency = int(f.readline().strip())
+                    length = int(f.readline().strip())
+                    attribute = CoreDictionary.Attribute()
+                    attribute.total_frequency = current_total_frequency
+                    for j in range(length):
+                        index = int(f.readline().strip())
+                        attribute.nature.append(nature_index_array[index])
+                        attribute.frequency.append(int(f.readline().strip()))
+                    attributes.append(attribute)
+                if not cls.trie.load(f, attributes):
+                    return False
+                total_frequency = int(f.readline().strip())
+                Predefine.set_total_frequency(total_frequency)
+
+            # 从pickle缓存中加载
+            # with open(path.with_suffix(Predefine.BIN_EXT), "rb") as f:
+            #     cls.trie = pickle.load(f)
+            # Predefine.set_total_frequency(cls.trie.total_frequency)
+
+            # 从json对象中加载
             # with open(path.with_suffix(Predefine.BIN_EXT), "r") as f:
             #     obj = ujson.load(f)
             # v = []
@@ -128,7 +166,7 @@ class CoreDictionary(object):
             #     v.append(attribute)
             # trie_attributes = obj["trie_cache_obj"]
             # trie_attributes["v"] = v
-            # if not cls.trie.load(trie_attributes):
+            # if not cls.trie.load_from_json(trie_attributes):
             #     return False
             # Predefine.set_total_frequency(obj["all_total_frequency"])
             logger.info(f"核心词典从缓存文件{path.with_suffix(Predefine.BIN_EXT)}中加载......")

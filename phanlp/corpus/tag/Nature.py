@@ -39,9 +39,6 @@ class Nature:
     def __str__(self):
         return self.name
 
-    def ordinal(self) -> int:
-        return self.ordinal
-
 
 # 以下标签来自ICT
 Nature.bg = Nature("bg")  # 区别语素

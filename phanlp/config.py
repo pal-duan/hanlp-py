@@ -7,3 +7,5 @@ CORE_DICTIONARY_PATH = root_dir / "data/dictionary/CoreNatureDictionary.txt"
 CUSTOM_DICTIONARY_PATH = [root_dir / "data/dictionary/custom/CustomDictionary.txt"]
 # 用户自定义词典是否自动重新生成缓存（根据词典文件的最后修改时间是否大于缓存文件的时间判断）
 CUSTOM_DICTIONARY_AUTO_REFRESH_CACHE = True
+# 是否执行字符正规化（繁体->简体，全角->半角, 大写->小写），切换配置后必须删除CustomDictionary.bin缓存
+NORMALIZATION = False

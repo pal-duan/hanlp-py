@@ -12,6 +12,7 @@ class Predefine:
     TOTAL_FREQUENCY = 25146057
     myu = 1 - (1 / TOTAL_FREQUENCY + 0.00001)
     OOV_DEFAULT_FREQUENCY = 10000
+    TAG_OTHER = "未##它"  # 其它
 
     @classmethod
     def set_total_frequency(cls, total_frequency):

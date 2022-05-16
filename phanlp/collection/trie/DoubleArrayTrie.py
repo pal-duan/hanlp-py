@@ -9,6 +9,8 @@
 import abc
 from utility.TreeMap import to_treemap
 from collection.trie.Node import DictChildrenNode
+from algorithm.pytreemap import TreeMap
+from utility.logger import logger
 
 
 class ITrie(object, metaclass=abc.ABCMeta):
@@ -21,7 +23,7 @@ class ITrie(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def load(self, value) -> bool:
+    def load(self, fp, value) -> bool:
         pass
 
     @abc.abstractmethod
@@ -161,8 +163,8 @@ class DoubleArrayTrie(ITrie):
                 self.base[begin + siblings[i].code] = h
         return begin
 
-    def build(self, key_value_map: dict) -> int:
-        key_value_map = to_treemap(key_value_map)
+    def build(self, key_value_map: TreeMap) -> int:
+        # key_value_map = to_treemap(key_value_map)
         assert key_value_map is not None
         self.key = list(key_value_map.keys())
         self.v = list(key_value_map.values())
@@ -238,10 +240,17 @@ class DoubleArrayTrie(ITrie):
         return obj
 
     def save(self, out) -> bool:
-        # TODO
-        pass
+        try:
+            out.write(str(self.size) + "\n")
+            for i in range(self.size):
+                out.write(str(self.base[i]) + "\n")
+                out.write((str(self.check[i])) + "\n")
+        except Exception as e:
+            logger.warning(f"DoubleArrayTree缓存失败，\ndetail: {e}")
+            return False
+        return True
 
-    def load(self, attributes: dict) -> bool:
+    def load_from_json(self, attributes: dict) -> bool:
         try:
             self.base = attributes["base"]
             self.check = attributes["check"]
@@ -259,6 +268,16 @@ class DoubleArrayTrie(ITrie):
             self.v = attributes["v"]
         except Exception:
             return False
+        return True
+
+    def load(self, fp, value):
+        if fp is None:
+            return False
+        self.size = int(fp.readline().strip())
+        for i in range(self.size):
+            self.base.append(int(fp.readline().strip()))
+            self.check.append(int(fp.readline().strip()))
+        self.v = value
         return True
 
     def get(self, key: str):
@@ -298,10 +317,11 @@ if __name__ == "__main__":
     import re
     import psutil
     import os
+    from algorithm.pytreemap import TreeMap
     pid = os.getpid()
     p = psutil.Process(pid)
     info_start = p.memory_full_info().uss/1024
-    data = {}
+    data = TreeMap()
     start = time.time()
     with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
         for line in f:
