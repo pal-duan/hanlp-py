@@ -30,7 +30,7 @@ if __name__ == "__main__":
     import re
     data = TreeMap()
     start = time.time()
-    with open("D:\\模型\\hanlp-py\\data\\dictionary\\custom\\CustomDictionary.txt", "r", encoding="utf-8") as f:
+    with open("D:\\project\\hanlp-py\\data\\dictionary\\custom\\CustomDictionary.txt", "r", encoding="utf-8") as f:
         for line in f:
             s = re.split(r"\s", line.strip())
             # s = line.strip().split("\t")

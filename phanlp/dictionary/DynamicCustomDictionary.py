@@ -50,25 +50,8 @@ class DynamicCustomDictionary:
         logger.info(f"自定义词典开始加载：{main_path}")
         if cls._load_dat(main_path, dat):
             return True
-        _map = TreeMap()
-        custom_nature_collector = set()
         try:
-            for p in path:
-                default_nature = Nature.from_string("n")
-                filename = p.name
-                cut = filename.rfind(" ")
-                if cut > 0:
-                    nature = filename[cut+1:]
-                    p = p.parent / filename[:cut]
-                    try:
-                        default_nature = NatureUtility.covert_string2nature(nature, custom_nature_collector)
-                    except Exception as e:
-                        logger.error(f"配置文件【{p}】写错了！\ndetail: {e}")
-                        continue
-                logger.info(f"以默认词性[{default_nature}]加载自定义词典{p}中......")
-                success = cls.a_load(p, default_nature, _map, custom_nature_collector)
-                if not success:
-                    logger.warning(f"失败{p}")
+            _map, custom_nature_collector = IOUtil.load_dictionary(path)
             if _map.size() == 0:
                 logger.warning(f"没有加载到任何词条")
                 _map.put(Predefine.TAG_OTHER, None)
@@ -104,7 +87,6 @@ class DynamicCustomDictionary:
     @classmethod
     def _load_dat(cls, path, dat):
         return cls.load_dat(path, CUSTOM_DICTIONARY_PATH, dat)
-
 
     @classmethod
     def load_dat(cls, path, custom_dic_path, dat):
@@ -147,37 +129,6 @@ class DynamicCustomDictionary:
                 logger.info(f"已清除自定义词典缓存文件！")
                 return True
         return False
-
-    @classmethod
-    def a_load(cls, path, default_nature, _map, custom_nature_collector):
-        try:
-            splitter = r"\s"
-            if path.suffix == ".csv":
-               splitter = ","
-            with open(path, encoding="utf-8") as f:
-                for line in f:
-                    param = re.split(splitter, line.strip())
-                    if not param[0]:
-                        continue
-                    if NORMALIZATION:
-                        param[0] = CharTable.convert(param[0])
-                    nature_count = (len(param) - 1) // 2
-                    attribute = CoreDictionary.Attribute()
-                    if nature_count == 0:
-                        attribute.nature.append(default_nature)
-                        attribute.frequency.append(1000)
-                        attribute.total_frequency = 1000
-                    else:
-                        for i in range(nature_count):
-                            attribute.nature.append(NatureUtility.covert_string2nature(param[1+2*i], custom_nature_collector))
-                            attribute.frequency.append(int(param[2+2*i]))
-                            attribute.total_frequency += int(param[2+2*i])
-
-                    _map.put(param[0], attribute)
-        except Exception as e:
-            logger.warning(f"自定义词典{path}读取错误！\ndetail: {e}")
-            return False
-        return True
 
     def get(self, word: str):
         if NORMALIZATION:

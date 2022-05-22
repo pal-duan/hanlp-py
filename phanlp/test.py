@@ -5,3 +5,9 @@
     Description:
     
 """
+
+
+from phanlp import Phanlp
+
+
+# Phanlp.extract_words()
