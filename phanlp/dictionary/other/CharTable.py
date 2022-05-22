@@ -5,6 +5,7 @@ import pickle
 
 from utility.logger import logger
 from utility.Predefine import Predefine
+from config import  CHAR_TABLE_PATH
 
 
 class CharTableLoadError(Exception):
@@ -57,3 +58,10 @@ class CharTable:
         for s in sentence:
             res += cls.CONVERT[ord(s)]
         return res
+
+
+CharTable.load(CHAR_TABLE_PATH)
+
+
+if __name__ == '__main__':
+    pass

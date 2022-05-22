@@ -3,7 +3,7 @@
 """
 from abc import abstractmethod
 from collections.abc import Iterator
-import algorithm.pytreemap as ptm
+from algorithm import pytreemap as ptm
 from algorithm.pytreemap.abstract.map import Map
 from algorithm.pytreemap.abstract.navigable_map import NavigableMap
 from algorithm.pytreemap.abstract.abstract_map import AbstractMap

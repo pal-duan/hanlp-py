@@ -16,12 +16,14 @@ class BaseHeap(object):
     def compare(x, y):
         return True if x > y else False
 
-    def __init__(self, max_size: int = None):
+    def __init__(self, max_size: int = None, compare=None):
         if max_size is None:
             max_size = float("inf")
         self.max_size = max_size
         self.data = []
         self.count = 0
+        if compare is not None:
+            self.compare = compare
 
     def __len__(self):
         return self.count
@@ -40,7 +42,7 @@ class BaseHeap(object):
             if self.compare(self.data[0], value):
                 self.pop()
                 self.push(value)
-                return
+            return
         self.data.append(value)
         self._shift_up(self.count)
         self.count += 1
@@ -100,7 +102,7 @@ class BaseHeap(object):
         ans = []
         while not self.is_empty():
             ans.append(self.pop())
-        return ans
+        return ans[::-1]
 
 
 class MaxHeap(BaseHeap):
@@ -116,12 +118,12 @@ class MinHeap(BaseHeap):
 
 
 if __name__ == "__main__":
-    a = MinHeap()
+    a = MinHeap(3)
     l = [1,6,2,5,3,4,9,8,7,0]
     # for i in l:
     #     a.push(i)
     a.heapify(l)
     print(a.data)
     print(a.count)
-    for i in range(len(l)):
-        print(a.pop())
+    # for i in range(len(l)):
+    #     print(a.pop())

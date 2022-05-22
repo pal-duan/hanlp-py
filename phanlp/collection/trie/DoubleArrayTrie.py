@@ -182,10 +182,15 @@ class DoubleArrayTrie(ITrie):
         siblings = []
         self.fetch(root_node, siblings)
         self.insert(siblings, set())
+        self.shirnk()
 
         self.key = None
         self.length = None
         return self.error_
+
+    def shirnk(self):
+        self.base = self.base[:self.size+65535]
+        self.check = self.check[:self.size+65535]
 
     def resize(self, new_size):
         self.base += [0] * (new_size - len(self.base))
@@ -241,10 +246,10 @@ class DoubleArrayTrie(ITrie):
 
     def save(self, out) -> bool:
         try:
-            out.write(str(self.size) + "\n")
+            out.write((str(self.size) + "\n").encode("utf-8"))
             for i in range(self.size):
-                out.write(str(self.base[i]) + "\n")
-                out.write((str(self.check[i])) + "\n")
+                out.write((str(self.base[i]) + "\n").encode("utf-8"))
+                out.write((str(self.check[i]) + "\n").encode("utf-8"))
         except Exception as e:
             logger.warning(f"DoubleArrayTree缓存失败，\ndetail: {e}")
             return False
@@ -274,9 +279,11 @@ class DoubleArrayTrie(ITrie):
         if fp is None:
             return False
         self.size = int(fp.readline().strip())
+        self.base = [0] * (self.size + 65535)
+        self.check = [0] * (self.size + 65535)
         for i in range(self.size):
-            self.base.append(int(fp.readline().strip()))
-            self.check.append(int(fp.readline().strip()))
+            self.base[i] = int(fp.readline().strip())
+            self.check[i] = int(fp.readline().strip())
         self.v = value
         return True
 
@@ -317,6 +324,7 @@ if __name__ == "__main__":
     import re
     import psutil
     import os
+    import algorithm.pytreemap as ptm
     from algorithm.pytreemap import TreeMap
     pid = os.getpid()
     p = psutil.Process(pid)

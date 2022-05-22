@@ -2,7 +2,7 @@
 """TreeMap inner class.
 """
 from .navigable_sub_map import NavigableSubMap
-import algorithm.pytreemap as ptm
+from algorithm import pytreemap as ptm
 
 __author__ = 'Haoran Peng'
 __email__ = 'gavinsweden@gmail.com'

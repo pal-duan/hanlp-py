@@ -7,6 +7,7 @@
 """
 import time
 import os
+import re
 from pathlib import Path
 
 from config import CUSTOM_DICTIONARY_PATH, CUSTOM_DICTIONARY_AUTO_REFRESH_CACHE, NORMALIZATION
@@ -16,21 +17,22 @@ from utility.logger import logger
 from utility.Predefine import Predefine
 from algorithm.pytreemap import TreeMap
 from corpus.tag.Nature import Nature
-from utility.LexiconUtility import LexiconUtility
+from utility.NatureUtility import NatureUtility
 from dictionary.other.CharTable import CharTable
 from dictionary.CoreDictionary import CoreDictionary
+from corpus.io.IOUtil import IOUtil
 
 
 class DynamicCustomDictionary:
-    def __init__(self, *path):
+    def __init__(self, path):
         if not path:
             path = CUSTOM_DICTIONARY_PATH
         self.dat = DoubleArrayTrie()
         self.trie = BinTrie()
         self.path = None
-        self.load(*path)
+        self.load(path)
 
-    def load(self, *path):
+    def load(self, path):
         start = time.time()
         if not self._load_dictionary(path[0]):
             logger.warning(f"自定义词典{path}加载失败")
@@ -59,7 +61,7 @@ class DynamicCustomDictionary:
                     nature = filename[cut+1:]
                     p = p.parent / filename[:cut]
                     try:
-                        default_nature = LexiconUtility.covert_string2nature(nature, custom_nature_collector)
+                        default_nature = NatureUtility.covert_string2nature(nature, custom_nature_collector)
                     except Exception as e:
                         logger.error(f"配置文件【{p}】写错了！\ndetail: {e}")
                         continue
@@ -74,7 +76,19 @@ class DynamicCustomDictionary:
             dat.build(_map)
             if is_cache:
                 logger.info(f"正在缓存字典为dat文件......")
-                # TODO
+                with open(main_path.with_suffix(Predefine.BIN_EXT), "wb") as f:
+                    attribute_list = _map.values()
+                    if not custom_nature_collector:
+                        i = Nature.from_string("begin").ordinal + 1
+                        length = len(Nature.values)
+                        while i < length:
+                            custom_nature_collector.add(Nature.values[i])
+                            i += 1
+                    IOUtil.write_custom_nature(f, custom_nature_collector)
+                    f.write((str(attribute_list.size()) + "\n").encode('utf-8'))
+                    for attribute in attribute_list:
+                        attribute.save(f)
+                    dat.save(f)
 
         except FileNotFoundError as e:
             logger.warning(f"自定义词典{main_path}不存在！\ndetail: {e}")
@@ -89,14 +103,29 @@ class DynamicCustomDictionary:
 
     @classmethod
     def _load_dat(cls, path, dat):
-        cls.load_dat(path, CUSTOM_DICTIONARY_PATH, dat)
+        return cls.load_dat(path, CUSTOM_DICTIONARY_PATH, dat)
+
 
     @classmethod
     def load_dat(cls, path, custom_dic_path, dat):
         try:
             if CUSTOM_DICTIONARY_AUTO_REFRESH_CACHE and cls.is_dic_need_update(path, custom_dic_path):
                 return False
-            # TODO
+            with open(path.with_suffix(Predefine.BIN_EXT), "rb") as f:
+                size = int(f.readline().strip())
+                if size < 0:
+                    while size <= 0:
+                        Nature.create(f.readline().strip().decode("utf-8"))
+                        size += 1
+                    size = int(f.readline().strip())
+                attributes = []
+                nature_index_array = Nature.values
+                for i in range(size):
+                    attribute = CoreDictionary.Attribute.load(f, nature_index_array)
+                    attributes.append(attribute)
+                if not dat.load(f, attributes):
+                    return False
+
         except Exception as e:
             logger.warning(f"读取失败, \ndetail: {e}")
             return False
@@ -127,7 +156,7 @@ class DynamicCustomDictionary:
                splitter = ","
             with open(path, encoding="utf-8") as f:
                 for line in f:
-                    param = line.strip().split(splitter)
+                    param = re.split(splitter, line.strip())
                     if not param[0]:
                         continue
                     if NORMALIZATION:
@@ -140,7 +169,7 @@ class DynamicCustomDictionary:
                         attribute.total_frequency = 1000
                     else:
                         for i in range(nature_count):
-                            attribute.nature.append(LexiconUtility.covert_string2nature(param[1+2*i], custom_nature_collector))
+                            attribute.nature.append(NatureUtility.covert_string2nature(param[1+2*i], custom_nature_collector))
                             attribute.frequency.append(int(param[2+2*i]))
                             attribute.total_frequency += int(param[2+2*i])
 
@@ -150,13 +179,20 @@ class DynamicCustomDictionary:
             return False
         return True
 
+    def get(self, word: str):
+        if NORMALIZATION:
+            word = CharTable.convert(word)
+        attribute = self.dat.get(word)
+        if attribute is not None:
+            return attribute
+        if self.trie is None:
+            return None
+        return self.trie.get(word)
 
-
-
-
-
-
-
+    def contains(self, word):
+        if self.dat.exact_match_search(word) >= 0:
+            return True
+        return self.trie is not None and word in self.trie
 
 
 if __name__ == "__main__":

@@ -35,6 +35,25 @@ class CoreDictionary(object):
             self.frequency = []
             self.total_frequency = 0
 
+        def save(self, out):
+            out.write((str(self.total_frequency) + "\n").encode("utf-8"))
+            out.write((str(len(self.nature)) + "\n").encode("utf-8"))
+            for i in range(len(self.nature)):
+                out.write((str(self.nature[i].ordinal) + "\n").encode("utf-8"))
+                out.write((str(self.frequency[i]) + "\n").encode("utf-8"))
+
+        @classmethod
+        def load(cls, out, nature_index_array):
+            current_total_frequency = int(out.readline().strip())
+            length = int(out.readline().strip())
+            attribute = CoreDictionary.Attribute()
+            attribute.total_frequency = current_total_frequency
+            for j in range(length):
+                index = int(out.readline().strip())
+                attribute.nature.append(nature_index_array[index])
+                attribute.frequency.append(int(out.readline().strip()))
+            return attribute
+
     @classmethod
     def load(cls, path: str):
         if isinstance(path, str):
@@ -74,17 +93,13 @@ class CoreDictionary(object):
 
             # 写入缓存
             try:
-                with open(path.with_suffix(Predefine.BIN_EXT), "w") as f:
+                with open(path.with_suffix(Predefine.BIN_EXT), "wb") as f:
                     attribute_list = _map.values()
-                    f.write(str(attribute_list.size()) + "\n")
+                    f.write((str(attribute_list.size()) + "\n").encode('utf-8'))
                     for attribute in attribute_list:
-                        f.write(str(attribute.total_frequency) + "\n")
-                        f.write(str(len(attribute.nature)) + "\n")
-                        for i in range(len(attribute.nature)):
-                            f.write(str(attribute.nature[i].ordinal) + "\n")
-                            f.write(str(attribute.frequency[i]) + "\n")
+                        attribute.save(f)
                     cls.trie.save(f)
-                    f.write(str(total_frequency) + "\n")
+                    f.write((str(total_frequency) + "\n").encode("utf-8"))
 
                 # 直接用pickle缓存
                 # cls.trie.total_frequency = total_frequency
@@ -127,23 +142,16 @@ class CoreDictionary(object):
     @classmethod
     def load_dat(cls, path: Path) -> bool:
         try:
-            with open(path.with_suffix(Predefine.BIN_EXT), "r") as f:
-                size = int(f.readline().strip())
+            with open(path.with_suffix(Predefine.BIN_EXT), "rb") as fp:
+                size = int(fp.readline().strip())
                 attributes = []
                 nature_index_array = Nature.values
                 for i in range(size):
-                    current_total_frequency = int(f.readline().strip())
-                    length = int(f.readline().strip())
-                    attribute = CoreDictionary.Attribute()
-                    attribute.total_frequency = current_total_frequency
-                    for j in range(length):
-                        index = int(f.readline().strip())
-                        attribute.nature.append(nature_index_array[index])
-                        attribute.frequency.append(int(f.readline().strip()))
+                    attribute = cls.Attribute.load(fp, nature_index_array)
                     attributes.append(attribute)
-                if not cls.trie.load(f, attributes):
+                if not cls.trie.load(fp, attributes):
                     return False
-                total_frequency = int(f.readline().strip())
+                total_frequency = int(fp.readline().strip())
                 Predefine.set_total_frequency(total_frequency)
 
             # 从pickle缓存中加载
@@ -207,6 +215,25 @@ CoreDictionary.load(CoreDictionary.path)
 
 
 if __name__ == "__main__":
+    data = TreeMap()
+    start = time.time()
+    with open("D:\\模型\\hanlp-py\\data\\dictionary\\CoreNatureDictionary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            s = re.split(r"\s", line.strip())
+            # s = line.strip().split("\t")
+            data[s[0]] = "-".join(s[1:])
+    print(f"文件读取耗时：{time.time() - start}")
     print(CoreDictionary.trie.count())
     # print(CoreDictionary.trie.base)
     print("天空" in CoreDictionary.trie)
+    err = []
+    i = 0
+    for key, value in data.items():
+        f = CoreDictionary.trie.contain_key(key)
+        if not f:
+            err.append(key)
+        else:
+            v = CoreDictionary.trie.get(key)
+            if v != value:
+                i+=1
+    print(err, i)

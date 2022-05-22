@@ -15,9 +15,39 @@ class CustomDictionary(object):
     def __init__(self):
         pass
 
-    def get(self, word: str):
-        pass
+    @classmethod
+    def get(cls, word: str):
+        return cls.DEFAULT.get(word)
+
+    @classmethod
+    def contains(cls, word):
+        return cls.DEFAULT.contains(word)
 
 
 if __name__ == "__main__":
-    pass
+    from algorithm.pytreemap import TreeMap
+    import time
+    import re
+    data = TreeMap()
+    start = time.time()
+    with open("D:\\模型\\hanlp-py\\data\\dictionary\\custom\\CustomDictionary.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            s = re.split(r"\s", line.strip())
+            # s = line.strip().split("\t")
+            if s[0] in data:
+                print(s[0])
+            data[s[0]] = "-".join(s[1:])
+    print(f"文件读取耗时：{time.time() - start}")
+    print(data.size())
+    err = []
+    i = 0
+    for key, value in data.items():
+        f = CustomDictionary.contains(key)
+        if not f:
+            err.append(key)
+        else:
+            v = CustomDictionary.get(key)
+            if v != value:
+                i += 1
+    print(err, i)
+    print(len(err))
