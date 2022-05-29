@@ -54,7 +54,7 @@ class DoubleArrayTrie(ITrie):
         def __str__(self):
             return f"Node{{code={self.code}, depth={self.depth}, left={self.left}, right={self.right}}}"
 
-    def __init__(self, data: dict = None):
+    def __init__(self, data: TreeMap = None):
         self.check = []
         self.base = []
         self.size = 0
@@ -317,6 +317,49 @@ class DoubleArrayTrie(ITrie):
 
     def __str__(self):
         return f"DoubleArrayTrie{{key_size={self.key_size}}}"
+
+    class LongestSearcher:
+        def __init__(self, offset: int, text: str, obj):
+            self.text = text
+            self.i = offset
+            self.text_length = len(text)
+            self.begin = offset
+            self.length = None
+            self.obj = obj
+            self.index = None
+            self.value = None
+
+        def next(self):
+            self.length = 0
+            self.begin = self.i
+            b = self.obj.base[0]
+            while True:
+                if self.i >= self.text_length:
+                    return self.length > 0
+                p = b + ord(self.text[self.i]) + 1
+                if b == self.obj.check[p]:
+                    b = self.obj.base[p]
+                else:
+                    if self.begin == self.text_length:
+                        break
+                    if self.length > 0:
+                        self.i = self.begin + self.length
+                        return True
+                    self.i = self.begin
+                    self.begin += 1
+                    b = self.obj.base[0]
+                p = b
+                n = self.obj.base[p]
+                if b == self.obj.check[p] and n < 0:
+                    self.length = self.i - self.begin + 1
+                    self.index = -n - 1
+                    self.value = self.obj.v[self.index]
+                self.i += 1
+
+            return False
+
+    def get_longest_searcher(self, text: str, offset: int):
+        return self.LongestSearcher(offset, text, self)
 
 
 if __name__ == "__main__":

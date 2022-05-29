@@ -32,6 +32,9 @@ class TreeMap(NavigableMap, AbstractMap, Map):
         """Return the number of entries in the tree."""
         return self._size
 
+    def is_empty(self):
+        return len(self) == 0
+
     __len__ = size
 
     def contains_key(self, key):

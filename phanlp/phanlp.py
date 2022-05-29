@@ -16,10 +16,7 @@ from seg.Other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
 from seg.NShort.NShortSegment import NShortSegment
 from model.crf.CRFLexicalAnalyzer import CRFLexicalAnalyzer
 from model.perceptron.PerceptronLexicalAnalyzer import PerceptronLexicalAnalyzer
-
-
-class IllegalArgumentError(Exception):
-    pass
+from utility.CustomError import IllegalArgumentError
 
 
 class Phanlp(object):

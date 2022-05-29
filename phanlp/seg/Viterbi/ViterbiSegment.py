@@ -6,10 +6,20 @@
         Viterbi分词器
         也是最短路分词，最短路求解采用Viterbi算法
 """
+from seg.WordBasedSegment import WordBasedSegment
 
 
-class ViterbiSegment:
-    pass
+class ViterbiSegment(WordBasedSegment):
+    def __int__(self, custom_path=None, cache=False):
+        if custom_path:
+            self.load_custom_dic(custom_path, cache)
+
+    def load_custom_dic(self, custom_path, cache):
+        # TODO
+        pass
+
+    def seg2word(self, text: str):
+        pass
 
 
 if __name__ == "__main__":

@@ -34,8 +34,8 @@ if __name__ == "__main__":
         for line in f:
             s = re.split(r"\s", line.strip())
             # s = line.strip().split("\t")
-            if s[0] in data:
-                print(s[0])
+            if s[0] == "SHX-123":
+                print(s[0], s[1], s[2])
             data[s[0]] = "-".join(s[1:])
     print(f"文件读取耗时：{time.time() - start}")
     print(data.size())

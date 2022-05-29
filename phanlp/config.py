@@ -13,3 +13,9 @@ NORMALIZATION = True
 CHAR_TABLE_PATH = root_dir / "data/dictionary/other/CharTable.txt"
 # 新词发现缓存文件默认路径
 NEW_WORD_DISCOVER_CACHE = root_dir / "data/dictionary/NewWordDiscover"
+# 停用词词典路径
+CORE_STOP_WORD_DICTIONARY_PATH = root_dir / "data/dictionary/stopwords.txt"
+# 分词结果是否展示词性
+SHOW_TERM_NATURE = True
+# 字符类型对应表
+CHAR_TYPE_PATH = root_dir / "data/dictionary/other/CharType.json"

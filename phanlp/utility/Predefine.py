@@ -5,14 +5,20 @@
     Description:
     预定义的静态全局变量
 """
+import re
 
 
 class Predefine:
+    CHINESE_NUMBERS = "零○〇一二两三四五六七八九十廿百千万亿壹贰叁肆伍陆柒捌玖拾佰仟"
     BIN_EXT = ".bin"
     TOTAL_FREQUENCY = 25146057
     myu = 1 - (1 / TOTAL_FREQUENCY + 0.00001)
     OOV_DEFAULT_FREQUENCY = 10000
     TAG_OTHER = "未##它"  # 其它
+    TAG_CLUSTER = "未##串"  # 字符串 x
+    TAG_NUMBER = "未##数"  # 数词 m
+    PATTERN_FLOAT_NUMBER = re.compile("^(-?\\d+)(\\.\\d+)?$")
+
 
     @classmethod
     def set_total_frequency(cls, total_frequency):

@@ -39,6 +39,9 @@ class Nature:
     def __str__(self):
         return self.name
 
+    def __eq__(self, other):
+        return self.name == other.name and self.ordinal == other.ordinal
+
 
 # 以下标签来自ICT
 Nature.bg = Nature("bg")  # 区别语素
