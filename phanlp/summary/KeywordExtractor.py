@@ -13,21 +13,21 @@ from dictionary.stopword.CoreStopWordDictionary import CoreStopWordDictionary
 
 class KeywordExtractor(metaclass=abc.ABCMeta):
     def __init__(self, default_segment=StandardTokenizer.SEGMENT):
-        self.__default_segment = default_segment
+        self.default_segment = default_segment
 
     @staticmethod
     def should_include(term) -> bool:
         return CoreStopWordDictionary.should_include(term)
 
     def set_setment(self, segment):
-        self.__default_segment = segment
+        self.default_segment = segment
         return self
 
     def get_segment(self):
-        return self.__default_segment
+        return self.default_segment
 
     def get_keywords(self, document: str, size: int = 10) -> list:
-        return self._get_keywords(self.__default_segment.seg(document), size)
+        return self._get_keywords(self.default_segment.seg(document), size)
 
     def filter_term_list(self, term_list: list):
         result = []

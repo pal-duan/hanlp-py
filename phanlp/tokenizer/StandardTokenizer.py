@@ -5,11 +5,11 @@
     Description:
         标准分词器
 """
-from phanlp.phanlp import Phanlp
+from seg.Other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
 
 
 class StandardTokenizer:
-    SEGMENT = Phanlp.new_segment()
+    SEGMENT = DoubleArrayTrieSegment()
 
     @classmethod
     def segment(cls, text: str) -> list:

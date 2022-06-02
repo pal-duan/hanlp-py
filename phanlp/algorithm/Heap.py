@@ -96,6 +96,7 @@ class BaseHeap(object):
             return
         for i in array:
             self.push(i)
+        return self
 
     def to_list(self):
         # 自毁型操作
@@ -106,24 +107,22 @@ class BaseHeap(object):
 
 
 class MaxHeap(BaseHeap):
-    @staticmethod
-    def compare(x, y):
-        return True if x > y else False
+    def __init__(self, size=None, compare=lambda x, y: True if x > y else False):
+        super().__init__(size, compare)
 
 
 class MinHeap(BaseHeap):
-    @staticmethod
-    def compare(x, y):
-        return True if x < y else False
+    def __init__(self, size=None, compare=lambda x, y: True if x < y else False):
+        super().__init__(size, compare)
 
 
 if __name__ == "__main__":
     a = MinHeap(3)
-    l = [1,6,2,5,3,4,9,8,7,0]
+    l = [1,6,2,5,3,4,9,8,7,0, 0 , 0]
     # for i in l:
     #     a.push(i)
     a.heapify(l)
-    print(a.data)
+    print(a.to_list())
     print(a.count)
     # for i in range(len(l)):
     #     print(a.pop())

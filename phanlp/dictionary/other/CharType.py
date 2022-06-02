@@ -63,9 +63,16 @@ if __name__ == '__main__':
     #         print(i, a, b, c, d)
     #         f.write(f"{str(i)}    {str(a)}    {str(b)}    {str(c)}    {str(d)}")
     #         f.write("\n")
-    import ujson
-    with open("../../../data/dictionary/other/CharType.json", "r") as f:
-        result = ujson.load(f)
-        for i, t in enumerate(result):
-            if t == 8:
-                print(t, chr(i))
+    # import ujson
+    # with open("../../../data/dictionary/other/CharType.json", "r") as f:
+    #     result = ujson.load(f)
+    #     for i, t in enumerate(result):
+    #         if t == 8:
+    #             print(t, chr(i))
+    with open("../../../data/dictionary/ttt.txt") as f:
+        with open("../../../data/dictionary/other/CharType.json", "w", encoding="utf-8") as fp:
+            res = []
+            for line in f:
+                res.append(int(line.strip()))
+            ujson.dump(res, fp)
+

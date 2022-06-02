@@ -26,7 +26,7 @@ class Phanlp(object):
     @staticmethod
     def new_segment(algorithm=None):
         if algorithm is None or algorithm.lower() == "viterbi" or algorithm.lower() == "维特比":
-            return ViterbiSegment()
+            return DoubleArrayTrieSegment()
         elif algorithm.lower() == "dat" or algorithm.lower() == "双数组trie树":
             return DoubleArrayTrieSegment()
         elif algorithm.lower() == "nshort" or algorithm.lower() == "n最短路":

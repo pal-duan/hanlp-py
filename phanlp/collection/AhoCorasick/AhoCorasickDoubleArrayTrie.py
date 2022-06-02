@@ -8,7 +8,10 @@
 
 
 class AhoCorasickDoubleArrayTrie:
-    pass
+    def __init__(self, dictionary):
+        self.build(dictionary)
+
+
 
 
 if __name__ == "__main__":

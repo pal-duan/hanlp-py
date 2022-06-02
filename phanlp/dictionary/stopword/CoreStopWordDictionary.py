@@ -66,7 +66,7 @@ class CoreStopWordDictionary:
 
     @classmethod
     def contains(cls, key):
-        return cls.dictionary.contains(key)
+        return key in cls.dictionary
 
     __contains__ = contains
 
@@ -74,7 +74,7 @@ class CoreStopWordDictionary:
     def should_include(cls, term):
         nature = term.nature.to_string() if term.nature is not None else "空"
         first_char = nature[0]
-        if term.word not in cls and first_char not in ["m", "b", "c", "e", "o", "p", "q", "u", "y", "z", "r", "w"]:
+        if not cls.contains(term.word) and first_char not in ["m", "b", "c", "e", "o", "p", "q", "u", "y", "z", "r", "w"]:
             return True
         return False
 

@@ -10,6 +10,10 @@ from collections import deque
 from algorithm.ahocorasick.trie.TrieConfig import TrieConfig
 from algorithm.ahocorasick.trie.State import State
 from algorithm.ahocorasick.trie.Emit import Emit
+from algorithm.ahocorasick.interval.IntervalTree import IntervalTree
+from algorithm.ahocorasick.trie.FragmentToken import FragmentToken
+from algorithm.ahocorasick.trie.MatchToken import MatchToken
+from algorithm.pytreemap import TreeMap
 
 
 class Trie:
@@ -24,9 +28,30 @@ class Trie:
         self.trie_config.set_allow_overlaps(False)
         return self
 
-    def remain_longest(self):
-        self.trie_config.remain_longest = True
-        return self
+    def remain_longest(self, collected_emits=None):
+        if collected_emits is None:
+            self.trie_config.remain_longest = True
+            return self
+        if len(collected_emits) < 2:
+            return
+        emit_map_start = TreeMap()
+        for emit in collected_emits:
+            pre = emit_map_start.get(emit.get_start())
+            if pre is None or len(pre) < emit.size():
+                emit_map_start.put(emit.get_start(), emit)
+
+        if emit_map_start.size() < 2:
+            collected_emits.clear()
+            collected_emits.extend(emit_map_start.values())
+            return
+
+        emit_map_end = TreeMap()
+        for emit in emit_map_start.values():
+            pre = emit_map_end.get(emit.get_end())
+            if pre is None or pre.size() < emit.size():
+                emit_map_end.put(emit.get_end(), emit)
+        collected_emits.clear()
+        collected_emits.extend(emit_map_end.values())
 
     def add_keyword(self, keyword):
         if not keyword:
@@ -93,11 +118,47 @@ class Trie:
             for emit in emits:
                 collected_emits.append(Emit(position-len(emit)+1), position, emit)
 
-
     def tokenize(self, text):
         tokens = []
         collected_emits = self.parse_text(text)
-        interval_tree = Interval
+        interval_tree = IntervalTree(collected_emits)
+        interval_tree.remove_overlaps(collected_emits)
+
+        last_collected_position = -1
+        for emit in collected_emits:
+            if emit.get_start() - last_collected_position > 1:
+                tokens.append(self.create_fragment(emit, text, last_collected_position))
+            tokens.append(self.create_match(emit, text))
+            last_collected_position = emit.get_end()
+
+        if len(text) - last_collected_position > 1:
+            tokens.append(self.create_fragment(None, text, last_collected_position))
+        return tokens
+
+    @staticmethod
+    def create_fragment(emit, text, last_collected_position):
+        return FragmentToken(text[last_collected_position+1:len(text) if emit is None else emit.get_start()])
+
+    @staticmethod
+    def create_match(emit, text):
+        return MatchToken(text[emit.get_start():emit.get_end()+1], emit)
+
+    def dfs(self):
+        # TODO
+        pass
+
+    def has_keyword(self, text):
+        self.check_for_constructed_failure_states()
+        current_state = self.root_state
+        for i in range(len(text)):
+            next_state = self.get_state(current_state, text[i])
+            if next_state is not None and next_state != current_state and len(next_state.get_emits()) != 0:
+                return True
+            current_state = next_state
+        return False
+
+
+
 
 if __name__ == "__main__":
     pass

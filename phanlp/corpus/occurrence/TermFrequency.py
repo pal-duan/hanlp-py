@@ -25,4 +25,10 @@ class TermFrequency:
             return self.word > other.word
         return self.frequency > other.frequency
 
+    def __str__(self):
+        return f"{self.word}={self.frequency}"
+
+    def __repr__(self):
+        return f"{self.word}={self.frequency}"
+
 

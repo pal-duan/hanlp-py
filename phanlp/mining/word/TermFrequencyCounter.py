@@ -22,7 +22,7 @@ class TermFrequencyCounter(KeywordExtractor):
     def add(self, document: str):
         if not document:
             return
-        term_list = self.default_segment.lcut(document)
+        term_list = self.default_segment.seg(document)
         self.add_from_term_list(term_list)
 
     def add_from_term_list(self, term_list: list):

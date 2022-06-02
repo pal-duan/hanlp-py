@@ -31,7 +31,8 @@ class DoubleArrayTrieSegment(DictionaryBasedSegment):
         if self.config.use_custom_dictionary:
             self.match_longest(text, word_net, nature_array, self.custom_dictionary.dat)
             if self.custom_dictionary.trie is not None:
-                self.custom_dictionary.trie
+                # TODO
+                pass
         term_list = []
         self.pos_tag(text, word_net, nature_array)
         i = 0
@@ -54,4 +55,4 @@ class DoubleArrayTrieSegment(DictionaryBasedSegment):
 if __name__ == "__main__":
     segment = DoubleArrayTrieSegment()
     segment.enable_part_of_speech_tagging(True)
-    print(segment.seg("三星SHX-123型号的手机"))
+    print(segment.seg("7月21日，渤海海况恶劣，至少发生3起沉船事故，10余名船员危在旦夕。危急时刻，中国海油渤海油田再次行动起来，紧急调配救援力量救起10名遇险人员。"))

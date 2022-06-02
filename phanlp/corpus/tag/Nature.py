@@ -36,6 +36,9 @@ class Nature:
     def first_char(self) -> str:
         return self.name[0]
 
+    def to_string(self):
+        return self.name
+
     def __str__(self):
         return self.name
 
