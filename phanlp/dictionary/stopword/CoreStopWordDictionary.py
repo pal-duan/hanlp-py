@@ -14,8 +14,19 @@ from utility.Predefine import Predefine
 from config import CORE_STOP_WORD_DICTIONARY_PATH
 
 
+class Filter:
+    def should_include(self, term):
+        nature = term.nature.to_string() if term.nature is not None else "空"
+        first_char = nature[0]
+        if not CoreStopWordDictionary.contains(term.word) and first_char not in ["m", "b", "c", "e", "o", "p", "q", "u", "y", "z", "r",
+                                                              "w"]:
+            return True
+        return False
+
+
 class CoreStopWordDictionary:
     dictionary = StopWordDictionary()
+    filter_ = Filter()
 
     @classmethod
     def load(cls, core_stop_word_dictionary_path, load_cache_if_possible=True):
@@ -72,11 +83,7 @@ class CoreStopWordDictionary:
 
     @classmethod
     def should_include(cls, term):
-        nature = term.nature.to_string() if term.nature is not None else "空"
-        first_char = nature[0]
-        if not cls.contains(term.word) and first_char not in ["m", "b", "c", "e", "o", "p", "q", "u", "y", "z", "r", "w"]:
-            return True
-        return False
+        return cls.filter_.should_include(term)
 
 
 CoreStopWordDictionary.load(CORE_STOP_WORD_DICTIONARY_PATH)

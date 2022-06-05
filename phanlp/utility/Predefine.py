@@ -19,6 +19,10 @@ class Predefine:
     TAG_NUMBER = "未##数"  # 数词 m
     PATTERN_FLOAT_NUMBER = re.compile("^(-?\\d+)(\\.\\d+)?$")
 
+    RIGHT = "\u0000"  # 两个词的正向连接符
+    LEFT = "\u0001"  # 两个词的逆向连接符
+
+    MIN_PROBABILITY = 1e-10
 
     @classmethod
     def set_total_frequency(cls, total_frequency):

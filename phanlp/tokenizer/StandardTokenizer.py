@@ -5,11 +5,11 @@
     Description:
         标准分词器
 """
-from seg.Other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
+from seg import new_segment
 
 
 class StandardTokenizer:
-    SEGMENT = DoubleArrayTrieSegment()
+    SEGMENT = new_segment()
 
     @classmethod
     def segment(cls, text: str) -> list:

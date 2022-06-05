@@ -16,6 +16,7 @@ class BaseNode(metaclass=abc.ABCMeta):
         self.key = key
         self.value = value
         self.status = status
+        self.children = None
 
     @abc.abstractmethod
     def add_child(self, node):
@@ -80,6 +81,17 @@ class BaseNode(metaclass=abc.ABCMeta):
         if isinstance(other, BaseNode):
             other = other.key
         return self.key >= other
+
+    def walk(self, sb, entry_set):
+        sb += self.key
+        if self.status == self.StatusEnum.WORD_MIDDLE_2 or self.status == self.StatusEnum.WORD_END_3:
+            entry_set.add((sb, self.value))
+        if self.children is None:
+            return
+        for node in self.children:
+            if node is None:
+                continue
+            node.walk(sb, entry_set)
 
     def __str__(self):
         return f"BaseNode{{status={self.status}, key={self.key}, value={self.value}}}"

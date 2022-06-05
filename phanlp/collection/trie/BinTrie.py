@@ -2,6 +2,7 @@
 
 from collection.trie.Trie import BaseTrie
 from collection.trie.Node import ListChildrenNode
+from algorithm.pytreemap import TreeSet
 
 
 def char_hash(key: str, length: int = 5) -> int:
@@ -73,6 +74,31 @@ class BinTrie(ListChildrenNode, BaseTrie):
                 return None
         if state.add_child(ListChildrenNode(key[-1], None, self.StatusEnum.UNDEFINED_0)):
             self.size -= 1
+
+    def prefix_search(self, key):
+        """
+        前缀查询
+        :param key:
+        :return:
+        """
+        entry_set = TreeSet()
+        branch = self
+        for char in key:
+            if branch is None:
+                return entry_set
+            branch = branch.get_child(char)
+        if branch is None:
+            return entry_set
+        branch.walk(key, entry_set)
+        return entry_set
+
+    def entry_set(self):
+        entry_set = TreeSet()
+        for node in self.children:
+            if node is None:
+                continue
+            node.walk("", entry_set)
+        return entry_set
 
 
 if __name__ == "__main__":

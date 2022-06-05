@@ -18,7 +18,7 @@ class Config:
         self.organization_recognize = False  # 是否识别机构
         self.use_custom_dictionary = True  # 是否加载用户词典
         self.force_custom_dictionary = False  # 用户词典高优先级
-        self.speech_tagging = False  # 词性标注
+        self.speech_tagging = True  # 词性标注
         self.ner = True  # 命名实体识别是否至少有一项被激活
         self.offset = False  # 是否计算偏移量
         self.number_quantifier_recognize = False  # 是否识别数字和量词

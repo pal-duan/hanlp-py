@@ -1,6 +1,8 @@
 from pathlib import Path
 root_dir = Path(__file__).parent.parent
 
+DEBUG = True
+
 # 核心词典路径
 CORE_DICTIONARY_PATH = root_dir / "data/dictionary/CoreNatureDictionary.txt"
 # 用户自定义词典路径

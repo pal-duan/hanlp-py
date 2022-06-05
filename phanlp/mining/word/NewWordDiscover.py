@@ -110,34 +110,34 @@ class NewWordDiscover(object):
 
 
 if __name__ == "__main__":
-    # CORPUS_PATH = "D:\\project\\hanlp-py\\data\\test\\红楼梦.txt"
-    # discover = NewWordDiscover(
-    #     _filter=True,
-    #     max_word_len=6,
-    #     min_freq=0.0,
-    #     min_entropy=1,
-    #     min_aggregation=100)
-    # a = discover.discover(CORPUS_PATH, 100)
-    # print(a)
-    # print([i.text for i in a])
-    CORPUS_PATH = "D:\\project\\hanlp-py\\data\\test\\weibo-classification"
-    for folder in Path(CORPUS_PATH).iterdir():
-        print(folder.name)
-        line_list = []
-        for file in folder.iterdir():
-            with open(file, encoding="utf-8") as f:
-                for line in f:
-                    line_list.append(line)
-        lines = "\n".join(line_list)
-        discover = NewWordDiscover(
-            _filter=True,
-            max_word_len=6,
-            min_freq=0.0,
-            min_entropy=1,
-            min_aggregation=100)
-        a = discover.discover(lines, 300)
-        # print(a)
-        print([i.text for i in a])
+    CORPUS_PATH = "D:\\project\\hanlp-py\\data\\test\\红楼梦.txt"
+    discover = NewWordDiscover(
+        _filter=True,
+        max_word_len=6,
+        min_freq=0.0,
+        min_entropy=1,
+        min_aggregation=100)
+    a = discover.discover(CORPUS_PATH, 100)
+    print(a)
+    print([i.text for i in a])
+    # CORPUS_PATH = "D:\\project\\hanlp-py\\data\\test\\weibo-classification"
+    # for folder in Path(CORPUS_PATH).iterdir():
+    #     print(folder.name)
+    #     line_list = []
+    #     for file in folder.iterdir():
+    #         with open(file, encoding="utf-8") as f:
+    #             for line in f:
+    #                 line_list.append(line)
+    #     lines = "\n".join(line_list)
+    #     discover = NewWordDiscover(
+    #         _filter=True,
+    #         max_word_len=6,
+    #         min_freq=0.0,
+    #         min_entropy=1,
+    #         min_aggregation=100)
+    #     a = discover.discover(lines, 300)
+    #     # print(a)
+    #     print([i.text for i in a])
 
 
 

@@ -10,13 +10,7 @@ from pathlib import Path
 
 from mining.word.NewWordDiscover import NewWordDiscover
 from summary.TextRankKeyword import TextRankKeyword
-from utility.logger import logger
-from seg.Viterbi.ViterbiSegment import ViterbiSegment
-from seg.Other.DoubleArrayTrieSegment import DoubleArrayTrieSegment
-from seg.NShort.NShortSegment import NShortSegment
-from model.crf.CRFLexicalAnalyzer import CRFLexicalAnalyzer
-from model.perceptron.PerceptronLexicalAnalyzer import PerceptronLexicalAnalyzer
-from utility.CustomError import IllegalArgumentError
+from seg import new_segment
 
 
 class Phanlp(object):
@@ -25,26 +19,7 @@ class Phanlp(object):
 
     @staticmethod
     def new_segment(algorithm=None):
-        if algorithm is None or algorithm.lower() == "viterbi" or algorithm.lower() == "维特比":
-            return DoubleArrayTrieSegment()
-        elif algorithm.lower() == "dat" or algorithm.lower() == "双数组trie树":
-            return DoubleArrayTrieSegment()
-        elif algorithm.lower() == "nshort" or algorithm.lower() == "n最短路":
-            return NShortSegment()
-        elif algorithm.lower() == "crf" or algorithm.lower() == "条件随机场":
-            try:
-                return CRFLexicalAnalyzer()
-            except IOError as e:
-                logger.warning(f"CRF模型加载失败")
-                raise RuntimeError(e)
-        elif algorithm.lower() == "perceptron" or algorithm.lower() == "感知机":
-            try:
-                return PerceptronLexicalAnalyzer()
-            except IOError as e:
-                logger.warning(f"感知机模型加载失败！")
-                raise RuntimeError(e)
-        else:
-            raise IllegalArgumentError(f"非法参数 algorithm == {algorithm}")
+        return new_segment(algorithm)
 
     @staticmethod
     def extract_words(
