@@ -17,12 +17,20 @@ class Predefine:
     TAG_OTHER = "未##它"  # 其它
     TAG_CLUSTER = "未##串"  # 字符串 x
     TAG_NUMBER = "未##数"  # 数词 m
+    TAG_PEOPLE = "未##人"  # 人名 nr
+    TAG_PLACE = "未##地"  # 地址
+    TAG_GROUP = "未##团"  # 团体名词
+    TAG_TIME = "未##时"  # 时间 t
+    TAG_PROPER = "未##专"  # 专有名词 nx
+    TAG_BIGIN = "始##始"  # 句子的开始 begin
+    TAG_END = "末##末"  # 结束 end
     PATTERN_FLOAT_NUMBER = re.compile("^(-?\\d+)(\\.\\d+)?$")
 
     RIGHT = "\u0000"  # 两个词的正向连接符
     LEFT = "\u0001"  # 两个词的逆向连接符
 
     MIN_PROBABILITY = 1e-10
+    LAMBDA = 0.9  # Unigram 平滑因子
 
     @classmethod
     def set_total_frequency(cls, total_frequency):

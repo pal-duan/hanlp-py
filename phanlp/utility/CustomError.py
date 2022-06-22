@@ -6,3 +6,7 @@ class IllegalArgumentError(Exception):
 
 class CoreStopWordDictionaryLoadError(Exception):
     pass
+
+
+class RelationDictionaryLoadError(Exception):
+    pass

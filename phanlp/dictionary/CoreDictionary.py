@@ -28,12 +28,44 @@ class CoreDictionaryLoadError(Exception):
 class CoreDictionary(object):
     trie = DoubleArrayTrie()
     path = CORE_DICTIONARY_PATH
+    NR_WORD_ID = None
+    NS_WORD_ID = None
+    NT_WORD_ID = None
+    T_WORD_ID = None
+    X_WORD_ID = None
+    M_WORD_ID = None
+    NX_WORD_ID = None
+
+    # 一些特殊的WORD_ID
+    @staticmethod
+    def get_word_id(a):
+        return CoreDictionary.trie.exact_match_search(a)
 
     class Attribute:
-        def __init__(self):
-            self.nature = []
-            self.frequency = []
-            self.total_frequency = 0
+        def __init__(self, nature=None, frequency=1000, total_frequency=None):
+            if nature is None:
+                self.nature = []
+                self.frequency = []
+                self.total_frequency = 0
+            elif isinstance(nature, list):
+                assert isinstance(frequency, list)
+                assert len(nature) == len(frequency)
+                if total_frequency is None:
+                    total_frequency = sum(frequency)
+                else:
+                    assert total_frequency == sum(frequency)
+                self.nature = nature
+                self.frequency = frequency
+                self.total_frequency = total_frequency
+            elif isinstance(nature, Nature):
+                assert isinstance(nature, int)
+                if total_frequency is None:
+                    total_frequency = frequency
+                else:
+                    assert total_frequency == frequency
+                self.nature = [nature]
+                self.frequency = [frequency]
+                self.total_frequency = total_frequency
 
         def save(self, out):
             out.write((str(self.total_frequency) + "\n").encode("utf-8"))
@@ -53,6 +85,16 @@ class CoreDictionary(object):
                 attribute.nature.append(nature_index_array[index])
                 attribute.frequency.append(int(out.readline().strip()))
             return attribute
+
+        def get_nature_frequency(self, nature):
+            if isinstance(nature, str):
+                nature = Nature.create(nature)
+            i = 0
+            for pos in self.nature:
+                if nature == pos:
+                    return self.frequency[i]
+                i += 1
+            return 0
 
     @classmethod
     def load(cls, path: str):
@@ -129,7 +171,6 @@ class CoreDictionary(object):
                 Predefine.set_total_frequency(total_frequency)
             except Exception as e:
                 logger.warning(f"保存失败！\ndetail: {e}")
-                return False
 
         except FileNotFoundError as e:
             logger.warning(f"核心词典{path}不存在！\ndetail: {e}")
@@ -187,8 +228,11 @@ class CoreDictionary(object):
         return True
 
     @classmethod
-    def get(cls, word: str):
-        return cls.trie[word]
+    def get(cls, word):
+        if isinstance(word, str):
+            return cls.trie[word]
+        elif isinstance(word, int):
+            return cls.trie.get_from_index(word)
 
     @classmethod
     def get_term_frequency(cls, term: str) -> int:
@@ -212,6 +256,13 @@ class CoreDictionary(object):
 
 
 CoreDictionary.load(CoreDictionary.path)
+CoreDictionary.NR_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_PEOPLE)
+CoreDictionary.NS_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_PLACE)
+CoreDictionary.NT_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_GROUP)
+CoreDictionary.T_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_TIME)
+CoreDictionary.X_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_CLUSTER)
+CoreDictionary.M_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_NUMBER)
+CoreDictionary.NX_WORD_ID = CoreDictionary.get_word_id(Predefine.TAG_PROPER)
 
 
 if __name__ == "__main__":

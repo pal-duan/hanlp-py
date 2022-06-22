@@ -287,7 +287,7 @@ class DoubleArrayTrie(ITrie):
         self.v = value
         return True
 
-    def get(self, key: str):
+    def get(self, key):
         index = self.exact_match_search(key)
         if index >= 0:
             return self.get_from_index(index)

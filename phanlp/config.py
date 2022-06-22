@@ -21,3 +21,7 @@ CORE_STOP_WORD_DICTIONARY_PATH = root_dir / "data/dictionary/stopwords.txt"
 SHOW_TERM_NATURE = True
 # 字符类型对应表
 CHAR_TYPE_PATH = root_dir / "data/dictionary/other/CharType.json"
+# 二元语法词典路径
+BI_GRAM_DICTIONARY_PATH = root_dir / "data/dictionary/CoreNatureDictionary.ngram.txt"
+# 核心同义词词典路径
+CORE_SYNONYM_DICTIONARY_PATH = root_dir / "data/dictionary/CoreSynonymDictionary.txt"
