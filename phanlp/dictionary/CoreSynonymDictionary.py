@@ -6,6 +6,7 @@
 from config import CORE_SYNONYM_DICTIONARY_PATH
 from dictionary.common.CommonRelationDictionary import CommonRelationDictionary
 from spider.baidu_hanyu_spider import BaiduHanyuSpider
+from spider.baidu_baike_spider import BaiduBaikeSpider
 
 
 class CoreSynonymDictionary:
@@ -26,6 +27,7 @@ class CoreSynonymDictionary:
     @classmethod
     def get_synonym_from_else(cls, key):
         res1 = BaiduHanyuSpider.search(key)
+        res2 = BaiduBaikeSpider.search(key)
 
     def rewrite_quickly(self, text):
         pass

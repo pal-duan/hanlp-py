@@ -24,8 +24,9 @@ class BaiduHanyuSpider:
             "user-agent": ua.random
         }
         try:
-            response = requests.get(url, headers=headers, timeout=1)
+            response = requests.get(url, headers=headers)
             synonyms = cls.get_synonyms(response.text)
+            logger.info(f"百度汉语中找到词语---{key}---的同义词{synonyms}")
         except Exception as e:
             logger.warning(f"百度汉语爬取字词---{key}---的同义词失败！detail: \n{e}")
             return []
@@ -34,11 +35,11 @@ class BaiduHanyuSpider:
     @classmethod
     def get_synonyms(cls, response):
         tree = etree.HTML(response)
-        a_list = tree.xpath('//*[@id="synonym"]/div/a')
+        a_list = tree.xpath('//*[@id="synonym"]/div/a/text()')
         synonyms = []
         if a_list:
-            synonyms = [a.text for a in a_list]
-        return synonyms
+            synonyms = [a.strip() for a in a_list]
+        return set(synonyms)
 
 
 if __name__ == "__main__":

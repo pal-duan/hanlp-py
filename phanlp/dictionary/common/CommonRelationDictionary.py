@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 from collection.trie.DoubleArrayTrie import DoubleArrayTrie
+from collection.trie.BinTrie import BinTrie
 from utility.logger import logger
 from utility.CustomError import RelationDictionaryLoadError
 from utility.Predefine import Predefine
@@ -17,6 +18,7 @@ from algorithm.pytreemap import TreeMap, TreeSet
 class CommonRelationDictionary:
     def __init__(self):
         self.trie = DoubleArrayTrie()
+        self.bin_trie = BinTrie()
 
     class RelationItem:
         def __init__(self, entry, word_list, rela_type):
@@ -72,9 +74,10 @@ class CommonRelationDictionary:
                 for line in f:
                     ts = TreeSet()
                     word_list = line.strip().split(" ")
-                    ts.add_all(word_list)
-                    for word in word_list:
-                        tree_map.put(word, self.RelationItem(word, ts, rela_type))
+                    if len(word_list) < 2:
+                        continue
+                    ts.add_all(word_list[1:])
+                    tree_map.put(word_list[0], self.RelationItem(word_list[0], ts, rela_type))
 
             result_code = self.trie.build(tree_map)
             if result_code:
@@ -139,7 +142,10 @@ class CommonRelationDictionary:
         return False
 
     def get(self, key):
-        return self.trie.get(key)
+        item = self.trie[key]
+        if item is not None:
+            return item
+        return self.bin_trie[key]
 
     def __getitem__(self, key):
         return self.get(key)
